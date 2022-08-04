@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  app:
+    container_name: taira_app
+    build:
+      context: ./docker/app
+    privileged: true
+    tty: true
+    command: ./gradlew clean bootRun
+    volumes:
+      - ./:/app:delegated
+    networks:
+      - libs_network
+      - libs_common_network
+    ports:
+      - "10081:8080"
+
+networks:
+  libs_network:
+    driver: "bridge"
+  libs_common_network:
+    external: true
