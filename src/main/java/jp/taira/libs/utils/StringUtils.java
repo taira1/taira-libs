@@ -2,9 +2,12 @@ package jp.taira.libs.utils;
 
 import lombok.extern.slf4j.Slf4j;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -242,5 +245,349 @@ public class StringUtils {
      */
     public static boolean endsWithIgnoreCase(final String target, final String suffix) {
         return target != null && target.toLowerCase().endsWith(suffix != null ? suffix.toLowerCase(): suffix);
+    }
+
+    /**
+     * 先頭および末尾にある空白文字(全角、半角)をすべて削除します。
+     *
+     * @param target 対象文字列
+     * @return 削除された文字列
+     */
+    public static String trim(final String target) {
+        if (target == null) {
+            return null;
+        }
+
+        final String pattern = HALF_SPACE + FULL_SPACE + "\t\u00a0\u1680\u180e\u2000\u200a\u202f\u205f";
+        return target.replaceAll("^[" + pattern + "]+", "").replaceAll("[" + pattern + "]+$", "");
+    }
+
+    /**
+     * ASCIIのみかを判断する。
+     *
+     * @param target 対象文字列
+     * @return ASCIIのみである場合はtrue、そうでない場合はfalse。
+     */
+    public static boolean isAscii(final String target) {
+        return !isEmpty(target) && StandardCharsets.US_ASCII.newEncoder().canEncode(target);
+    }
+
+    /**
+     * 英字のみかを判断する。
+     *
+     * @param target 対象文字列
+     * @return 英字のみである場合はtrue、そうでない場合はfalse。
+     */
+    public static boolean isAlpha(final String target) {
+        return !isEmpty(target) && target.matches("^[a-zA-Z]+$");
+    }
+
+    /**
+     * 半角英数字のみかを判断する。
+     *
+     * @param target 対象文字列
+     * @return 半角英数字のみである場合はtrue、そうでない場合はfalse。
+     */
+    public static boolean isHalfAlphaNumeric(final String target) {
+        return !isEmpty(target) && target.matches("^[0-9a-zA-Z]+$");
+    }
+
+    /**
+     * ひらがなのみかを判断する。
+     *
+     * @param target 対象文字列
+     * @param containsSpace trueの場合は空白文字を含める。falseの場合は空白文字を含めない。
+     * @return ひらがなのみである場合はtrue、そうでない場合はfalse。
+     */
+    public static boolean isHiragana(final String target, final boolean containsSpace) {
+        if (isBlank(target)) {
+            return false;
+        }
+
+        final String pattern = HIRAGANA_PATTERN + (containsSpace ? HALF_SPACE + FULL_SPACE : "");
+        return target.matches("^[" + pattern + "]+$");
+    }
+
+    /**
+     * ひらがなのみかを判断する。
+     *
+     * @param target 対象文字列
+     * @return ひらがなのみである場合はtrue、そうでない場合はfalse。
+     */
+    public static boolean isHiragana(final String target) {
+        return isHiragana(target, false);
+    }
+
+    /**
+     * カタカナのみかを判断する。
+     *
+     * @param target 対象文字列
+     * @param containsSpace trueの場合は空白文字を含める。falseの場合は空白文字を含めない。
+     * @return カタカナのみである場合はtrue、そうでない場合はfalse。
+     */
+    public static boolean isKatakana(final String target, final boolean containsSpace) {
+        if (isBlank(target)) {
+            return false;
+        }
+
+        final String pattern = KATAKANA_PATTERN + (containsSpace ? HALF_SPACE + FULL_SPACE : "");
+        return target.matches("^[" + pattern + "]+$");
+    }
+
+    /**
+     * カタカナのみかを判断する。
+     *
+     * @param target 対象文字列
+     * @return カタカナのみである場合はtrue、そうでない場合はfalse。
+     */
+    public static boolean isKatakana(final String target) {
+        return isKatakana(target, false);
+    }
+
+    /**
+     * 半角カタカナのみかを判断する。
+     *
+     * @param target 対象文字列
+     * @param containsSpace trueの場合は空白文字を含める。falseの場合は空白文字を含めない。
+     * @return カタカナのみである場合はtrue、そうでない場合はfalse。
+     */
+    public static boolean isHalfKatakana(final String target, final boolean containsSpace) {
+        if (isBlank(target)) {
+            return false;
+        }
+
+        final String pattern = HALF_KATAKANA_PATTERN + (containsSpace ? HALF_SPACE + FULL_SPACE : "");
+        return target.matches("^[" + pattern + "]+$");
+    }
+
+    /**
+     * 半角カタカナのみかを判断する。
+     *
+     * @param target 対象文字列
+     * @return カタカナのみである場合はtrue、そうでない場合はfalse。
+     */
+    public static boolean isHalfKatakana(final String target) {
+        return isHalfKatakana(target, false);
+    }
+
+    /**
+     * 全角文字(数字)を半角文字(数字)に変換する。
+     *
+     * @param target 対象文字列
+     * @return 変換された文字列
+     */
+    public static String toHalfOfNumber(final String target) {
+        return toHalfString(target, FULL_HALF_NUMBER);
+    }
+
+    /**
+     * 全角文字(英字)を半角文字(英字)に変換する。
+     *
+     * @param target 対象文字列
+     * @return 変換された文字列
+     */
+    public static String toHalfOfAlpha(final String target) {
+        Map<String, String> map = new HashMap<String, String>();
+        map.putAll(FULL_HALF_UPPER);
+        map.putAll(FULL_HALF_LOWER);
+        return toHalfString(target, map);
+    }
+
+    /**
+     * 全角文字(英字,大文字)を半角文字(英字,大文字)に変換する。
+     *
+     * @param target 対象文字列
+     * @return 変換された文字列
+     */
+    public static String toHalfOfAlphaUpper(final String target) {
+        return toHalfString(target, FULL_HALF_UPPER);
+    }
+
+    /**
+     * 全角文字(英字,小文字)を半角文字(英字,小文字)に変換する。
+     *
+     * @param target 対象文字列
+     * @return 変換された文字列
+     */
+    public static String toHalfOfAlphaLower(final String target) {
+        return toHalfString(target, FULL_HALF_LOWER);
+    }
+
+    /**
+     * 全角文字(記号)を半角文字(記号)に変換する。
+     *
+     * @param target 対象文字列
+     * @return 変換された文字列
+     */
+    public static String toHalfOfSymbol(final String target) {
+        return toHalfString(target, FULL_HALF_SYMBOL);
+    }
+
+    /**
+     * 全角文字(ASCII)を半角文字(ASCII)に変換する。
+     *
+     * @param target 対象文字列
+     * @return 変換された文字列
+     */
+    public static String toHalfOfAscii(final String target) {
+        Map<String, String> map = new HashMap<String, String>();
+        map.putAll(FULL_HALF_NUMBER);
+        map.putAll(FULL_HALF_UPPER);
+        map.putAll(FULL_HALF_LOWER);
+        map.putAll(FULL_HALF_SYMBOL);
+        return toHalfString(target, map);
+    }
+
+    /**
+     * 半角文字に変換する。
+     *
+     * @param target 対象文字列
+     * @param convertMap 文字列リストのセット
+     * @return 変換された文字列
+     */
+    private static String toHalfString(final String target, final Map<String, String> convertMap) {
+        if (isEmpty(target)) {
+            return target;
+        }
+
+        String result = target;
+        for (Map.Entry<String, String> map : convertMap.entrySet()) {
+            result = result.replace(map.getKey(), map.getValue());
+        }
+
+        return result;
+    }
+
+    /**
+     * 半角文字(数字)を全角文字(数字)に変換する。
+     *
+     * @param target 対象文字列
+     * @return 変換された文字列
+     */
+    public static String toFullOfNumber(final String target) {
+        return toFullString(target, FULL_HALF_NUMBER);
+    }
+
+    /**
+     * 半角文字(英字)を全角文字(英字)に変換する。
+     *
+     * @param target 対象文字列
+     * @return 変換された文字列
+     */
+    public static String toFullOfAlpha(final String target) {
+        Map<String, String> map = new HashMap<String, String>();
+        map.putAll(FULL_HALF_UPPER);
+        map.putAll(FULL_HALF_LOWER);
+        return toFullString(target, map);
+    }
+
+    /**
+     * 半角文字(英字,大文字)を全角文字(英字,大文字)に変換する。
+     *
+     * @param target 対象文字列
+     * @return 変換された文字列
+     */
+    public static String toFullOfAlphaUpper(final String target) {
+        return toFullString(target, FULL_HALF_UPPER);
+    }
+
+    /**
+     * 半角文字(英字,小文字)を全角文字(英字,小文字)に変換する。
+     *
+     * @param target 対象文字列
+     * @return 変換された文字列
+     */
+    public static String toFullOfAlphaLower(final String target) {
+        return toFullString(target, FULL_HALF_LOWER);
+    }
+
+    /**
+     * 半角文字(記号)を全角文字(記号)に変換する。
+     *
+     * @param target 対象文字列
+     * @return 変換された文字列
+     */
+    public static String toFullOfSymbol(final String target) {
+        return toFullString(target, FULL_HALF_SYMBOL);
+    }
+
+    /**
+     * 半角文字(ASCII)を全角文字(ASCII)に変換する。
+     *
+     * @param target 対象文字列
+     * @return 変換された文字列
+     */
+    public static String toFullOfAscii(final String target) {
+        Map<String, String> map = new HashMap<String, String>();
+        map.putAll(FULL_HALF_NUMBER);
+        map.putAll(FULL_HALF_UPPER);
+        map.putAll(FULL_HALF_LOWER);
+        map.putAll(FULL_HALF_SYMBOL);
+
+        return toFullString(target, map);
+    }
+
+    /**
+     * 全角文字に変換する。
+     *
+     * @param target 対象文字列
+     * @param convertMap 文字列リストのセット
+     * @return 変換された文字列
+     */
+    private static String toFullString(final String target, final Map<String, String> convertMap) {
+        if (isEmpty(target)) {
+            return target;
+        }
+
+        String result = target;
+        for (Map.Entry<String, String> map : convertMap.entrySet()) {
+            result = result.replace(map.getValue(), map.getKey());
+        }
+
+        return result;
+    }
+
+    /**
+     * URL形式かを判断する。
+     *
+     * @param target 対象文字列
+     * @return URL形式である場合はtrue、そうでない場合はfalse。
+     */
+    public static boolean isUrl(final String target) {
+        if (isEmpty(target)) {
+            return false;
+        }
+
+        try {
+            @SuppressWarnings("unused")
+            final URL url = new URL(target);
+        } catch (MalformedURLException e) {
+            log.debug(e.getMessage(), e);
+        }
+
+        return false;
+    }
+
+    public static boolean isEmail(final String target) {
+        if (isEmpty(target) || !target.contains("@")) {
+            return false;
+        }
+
+        // メールアドレス全体の長さの最大値 = 254文字
+        if (target.length() > 254) {
+            return false;
+        }
+
+        // ローカル部の長さの最大値 = 64文字
+        if (target.split("@", -1)[0].length() > 64) {
+            return false;
+        }
+
+        // ドメインの長さの最大値 = 253文字
+        if (target.split("@", -1)[1].length() > 253) {
+            return false;
+        }
+
+        return target.matches(EMAIL_PATTERN);
     }
 }
