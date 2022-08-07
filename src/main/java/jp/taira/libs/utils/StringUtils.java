@@ -1,15 +1,18 @@
 package jp.taira.libs.utils;
 
+import com.google.common.base.CaseFormat;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.coyote.http11.filters.SavedRequestInputFilter;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * 文字列ユーティリティクラス
@@ -200,6 +203,7 @@ public class StringUtils {
      */
     public static boolean isBlank(final String target) {
         String str = target == null ? null : target.replaceAll("[" + HALF_SPACE + FULL_SPACE + "]", "");
+
         return isEmpty(str);
     }
 
@@ -259,6 +263,7 @@ public class StringUtils {
         }
 
         final String pattern = HALF_SPACE + FULL_SPACE + "\t\u00a0\u1680\u180e\u2000\u200a\u202f\u205f";
+
         return target.replaceAll("^[" + pattern + "]+", "").replaceAll("[" + pattern + "]+$", "");
     }
 
@@ -305,6 +310,7 @@ public class StringUtils {
         }
 
         final String pattern = HIRAGANA_PATTERN + (containsSpace ? HALF_SPACE + FULL_SPACE : "");
+
         return target.matches("^[" + pattern + "]+$");
     }
 
@@ -331,6 +337,7 @@ public class StringUtils {
         }
 
         final String pattern = KATAKANA_PATTERN + (containsSpace ? HALF_SPACE + FULL_SPACE : "");
+
         return target.matches("^[" + pattern + "]+$");
     }
 
@@ -435,6 +442,7 @@ public class StringUtils {
         map.putAll(FULL_HALF_UPPER);
         map.putAll(FULL_HALF_LOWER);
         map.putAll(FULL_HALF_SYMBOL);
+
         return toHalfString(target, map);
     }
 
@@ -478,6 +486,7 @@ public class StringUtils {
         Map<String, String> map = new HashMap<String, String>();
         map.putAll(FULL_HALF_UPPER);
         map.putAll(FULL_HALF_LOWER);
+
         return toFullString(target, map);
     }
 
@@ -589,5 +598,193 @@ public class StringUtils {
         }
 
         return target.matches(EMAIL_PATTERN);
+    }
+
+    /**
+     * 半角スペースで埋める。
+     *
+     * @param target 対象文字列
+     * @param number 埋める個数を指定する。0の場合は処理しない。正の場合は先頭に埋める。負の場合は末尾に埋める。
+     * @param fixed trueの場合は固定長に補正する。falseの場合は固定長に補正しない。
+     * @return 半角で埋められた文字列
+     */
+    public static String fillSpace(final String target, final int number, final boolean fixed) {
+        if (number == 0) {
+            return target;
+        }
+
+        if (fixed && target != null && target.length() >= Math.abs(number)) {
+            return target;
+        }
+
+        final String result = target == null ? "" : target;
+        final int count =number + (fixed ? 0 : (result.length() * (number > 0 ? 1 : -1)));
+
+        return String.format("%" + count + "s", result);
+    }
+
+    /**
+     * 半角スペースで埋める。
+     *
+     * @param target 対象文字列
+     * @param number 埋める個数を指定する。0の場合は処理しない。正の場合は先頭に埋める。負の場合は末尾に埋める。
+     * @return 半角スペースで埋められた文字列
+     */
+    public static String fillSpace(final String target, final int number) {
+        return fillSpace(target, number, false);
+    }
+
+    public static String fillZero(final String target, final int number, final boolean fixed) {
+        String result = fillSpace(target, number, fixed);
+        final int targetLength = target != null ? target.length() : 0;
+        final int count = Math.max(Math.abs(fixed ? Math.abs(number) - targetLength: number), 0);
+
+        return result != null ?
+                result.replaceAll((number > 0 ? "^" : "") + " {" + count + "}" + (number < 0 ? "$" : ""), getNotNullString(repeat("0", count), "")) : result;
+    }
+
+    /**
+     * ゼロで埋める。
+     *
+     * @param target 対象文字列
+     * @param number 埋める個数を指定する。0の場合は処理しない。正の場合は先頭に埋める。負の場合は末尾に埋める。
+     * @return ゼロで埋められた文字列
+     */
+    public static String fillZero(final String target, final int number) {
+        return fillZero(target, number, false);
+    }
+
+    /**
+     * 文字のエンコーディングを行う。
+     *
+     * @param target 対象バイト配列
+     * @param sourceCharset チェックする文字コード
+     * @param targetCharset チェックする文字コード
+     * @return 文字エンコーディングしたバイト配列
+     */
+    public static byte[] encodeCharset(final byte[] target, final Charset sourceCharset, final Charset targetCharset) {
+        final ByteBuffer inputBuffer = ByteBuffer.wrap(target);
+        final CharBuffer charBuffer = sourceCharset.decode(inputBuffer);
+        final ByteBuffer outputBuffer = targetCharset.encode(charBuffer);
+
+        return outputBuffer.array();
+    }
+
+    /**
+     * 文字コードをチェックする。
+     *
+     * @param target 対象文字列
+     * @param charset チェックする文字コード
+     * @return 指定した文字コードである場合はtrue、そうでない場合はfalse
+     */
+    private static boolean checkCharacterCode(final String target, final Charset charset) {
+        if (isEmpty(target)) {
+            return true;
+        }
+
+        return charset.newEncoder().canEncode(target);
+    }
+
+    /**
+     * 'UTF-8'かを判断する。
+     *
+     * @param target 対象文字列
+     * @return 文字コードが'UTF-8'である場合はtrue、そうでない場合はfalse。
+     */
+    public static boolean isUTF8(final String target) {
+        return checkCharacterCode(target, UTF_8);
+    }
+
+    /**
+     * 文字列を改行コードで分割し、文字列リストを取得する。
+     *
+     * @param target 対象文字列
+     * @return 行ごとに格納された文字列リスト
+     */
+    public static List<String> splitReturnCode(final String target) {
+        if (isEmpty(target)) {
+            return null;
+        }
+
+        final String[] strs = target.split("(?:\r\n|\r|\n)");
+        return new LinkedList<>(Arrays.asList(strs));
+    }
+
+    /**
+     * 検索文字列を開始インデックスとして、先頭、または、末尾から、指定した文字数を削除する。
+     * @param target 対象文字列
+     * @param search 検索文字列
+     * @param length 削除する文字数
+     * @return 指定した文字数を削除した文字列
+     */
+    public static String strip(final String target, final String search, final int length) {
+        if (target == null || isEmpty(search)) {
+            return target;
+        }
+
+        final int index = target.indexOf(search);
+        if (index == -1) {
+            return target;
+        }
+
+        if (length < 0) {
+            if (Math.abs(length) <= index + 1) {
+                return target.substring(Math.abs(length));
+            } else {
+                throw new StringIndexOutOfBoundsException();
+            }
+        }
+
+        final int targetLength = target.length();
+
+        return target.substring(0, index) + target.substring(index, targetLength - Math.abs(length));
+    }
+
+    public static String camelToUpperSnake(final String target) {
+        if (isEmpty(target) || target.length() == 1) {
+            return target;
+        }
+
+        if (target.contains("_")) {
+            return target.toUpperCase();
+        }
+
+        return CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, target.substring(0, 1).toUpperCase() + target.substring(1));
+    }
+
+    /**
+     * 文字列を指定した回数分繰り返す。
+     *
+     * @param target 対象文字列
+     * @param count 繰り返す回数(自然数)
+     * @return 繰り返しされた文字列
+     */
+    public static String repeat(final String target, final int count) {
+        if (target == null || count <= 0) {
+            return null;
+        }
+
+        return IntStream.range(0, count).mapToObj(i -> target).collect(Collectors.joining());
+    }
+
+
+    /**
+     * nullでない文字列を取得する。
+     *
+     * @param args 対象リスト
+     * @return 対象リストのnullでない最初の文字列
+     */
+    public static String getNotNullString(String ... args) {
+        if (args.length == 0) {
+            return null;
+        }
+
+        for (final String value : args) {
+            if (value != null) {
+                return value;
+            }
+        }
+
+        return null;
     }
 }
