@@ -1,9 +1,11 @@
 package jp.taira.libs.utils;
 
+import com.fasterxml.jackson.dataformat.csv.CsvParser;
 import com.google.common.base.CaseFormat;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.http11.filters.SavedRequestInputFilter;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.ByteBuffer;
@@ -11,6 +13,7 @@ import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -750,6 +753,111 @@ public class StringUtils {
         }
 
         return CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, target.substring(0, 1).toUpperCase() + target.substring(1));
+    }
+
+    /**
+     * キャメルケースを(ローワー)スネークケースに変換する。
+     *
+     * @param target 対象文字列
+     * @return 変換された文字列
+     */
+    public static String camelToLowerSnake(final String target) {
+        if (StringUtils.isEmpty(target) || target.length() == 1) {
+            return target;
+        }
+
+        if (target.contains("_")) {
+            return target.toLowerCase();
+        }
+
+        return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, target.substring(0, 1).toUpperCase() + target.substring(1));
+    }
+
+    /**
+     * スネークケースを(アッパー)キャメルケースに変換する。
+     *
+     * @param target 対象文字列
+     * @return 変換された文字列
+     */
+    public static String snakeToUpperCamel(final String target) {
+        if (StringUtils.isEmpty(target)) {
+            return target;
+        }
+
+        if (!target.contains("_")) {
+            if (target.matches("^[a-z0-9]+$")) {
+                return target.toUpperCase();
+            }
+            if (target.matches("^[a-z].*")) {
+                return target.substring(0, 1).toUpperCase() + target.substring(1, target.length());
+            }
+            return target;
+        }
+
+        return CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, target.toLowerCase());
+    }
+
+    /**
+     * スネークケースを(ローワー)キャメルケースに変換する。
+     *
+     * @param target 対象文字列
+     * @return 変換された文字列
+     */
+    public static String snakeToLowerCamel(final String target) {
+        if (StringUtils.isEmpty(target)) {
+            return target;
+        }
+
+        if (!target.contains("_")) {
+            if (target.matches("^[A-Z0-9]+$")) {
+                return target.toLowerCase();
+            }
+            if (target.matches("^[A-Z].*")) {
+                return target.substring(0, 1).toLowerCase() + target.substring(1, target.length());
+            }
+            return target;
+        }
+
+        return CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, target.toLowerCase());
+    }
+
+    /**
+     * 電話番号形式かを判断する。
+     *
+     * @param target 対象文字列
+     * @return 電話番号形式である場合はtrue、そうでない場合はfalse。
+     */
+    public static boolean isPhoneNumber(final String target) {
+        if (isBlank(target)) {
+            return false;
+        }
+
+        /* 10桁,11桁の数字のみ */
+        return Pattern.compile("^\\d{10,11}$").matcher(target).find() ||
+                /* 固定電話 '00-0000-0000' */
+                Pattern.compile("^0\\d-\\d{4}-\\d{4}$").matcher(target).find() ||
+                /* 固定電話 '0000-00-0000' */
+                Pattern.compile("^0\\d{3}-\\d{2}-\\d{4}$").matcher(target).find() ||
+                /* 固定電話 '00000-0-0000' */
+                Pattern.compile("^0\\d{4}-\\d-\\d{4}$").matcher(target).find() ||
+                /* 固定電話 '000-000-0000' */
+                Pattern.compile("^0\\d{2}-\\d{3}-\\d{4}$").matcher(target).find() ||
+                /* 固定電話 '(000)000-0000' */
+                Pattern.compile("^\\(0\\d{2}\\)\\d{3}-\\d{4}$").matcher(target).find() ||
+                /* 固定電話 '(00)0000-0000' */
+                Pattern.compile("^\\(0\\d\\)\\d{4}-\\d{4}$").matcher(target).find() ||
+                /* 固定電話 '(0000)00-0000' */
+                Pattern.compile("^\\(0\\d{3}\\)\\d{2}-\\d{4}$").matcher(target).find() ||
+                /* 固定電話 '(00000)0-0000' */
+                Pattern.compile("^\\(0\\d{4}\\)\\d-\\d{4}$").matcher(target).find() ||
+                /* 携帯電話 '070,080,090-0000-0000' */
+                Pattern.compile("^(070|080|090)-\\d{4}-\\d{4}$").matcher(target).find() ||
+                /* IP電話 '050-0000-0000' */
+                Pattern.compile("^050-\\d{4}-\\d{4}$").matcher(target).find() ||
+                /* フリーダイヤル */
+                Pattern.compile("^0120-\\d{3}-\\d{3}$").matcher(target).find() ||
+                /* フリーダイヤル */
+                Pattern.compile("^0800-\\d{3}-\\d{3}$").matcher(target).find();
     }
 
     /**
