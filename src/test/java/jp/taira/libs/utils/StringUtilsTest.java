@@ -118,4 +118,30 @@ public class StringUtilsTest {
         assertFalse(StringUtils.endsWith("ABC", "c"));
         assertTrue(StringUtils.endsWith("ABC", "C"));
     }
+
+    @Test
+    public void endsWithIgnoreCaseTest() throws Exception {
+        assertFalse(StringUtils.endsWithIgnoreCase(null, null));
+        assertFalse(StringUtils.endsWithIgnoreCase(null, ""));
+        assertThrows(NullPointerException.class, () -> {
+            StringUtils.endsWithIgnoreCase(" ", null);
+        });
+        assertTrue(StringUtils.endsWithIgnoreCase(" ", ""));
+        assertTrue(StringUtils.endsWithIgnoreCase("", ""));
+
+        assertTrue(StringUtils.endsWithIgnoreCase("abc", ""));
+        assertFalse(StringUtils.endsWithIgnoreCase("abc", "a"));
+        assertFalse(StringUtils.endsWithIgnoreCase("abc", "A"));
+        assertFalse(StringUtils.endsWithIgnoreCase("abc", "b"));
+        assertFalse(StringUtils.endsWithIgnoreCase("abc", "B"));
+        assertTrue(StringUtils.endsWithIgnoreCase("abc", "c"));
+        assertTrue(StringUtils.endsWithIgnoreCase("abc", "C"));
+        assertTrue(StringUtils.endsWithIgnoreCase("ABC", ""));
+        assertFalse(StringUtils.endsWithIgnoreCase("ABC", "a"));
+        assertFalse(StringUtils.endsWithIgnoreCase("ABC", "A"));
+        assertFalse(StringUtils.endsWithIgnoreCase("ABC", "b"));
+        assertFalse(StringUtils.endsWithIgnoreCase("ABC", "B"));
+        assertTrue(StringUtils.endsWithIgnoreCase("ABC", "c"));
+        assertTrue(StringUtils.endsWithIgnoreCase("ABC", "C"));
+    }
 }
