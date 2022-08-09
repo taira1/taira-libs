@@ -255,6 +255,38 @@ public class StringUtils {
     }
 
     /**
+     * 指定された文字(列)が先頭および末尾に現れる箇所をすべて削除します。
+     *
+     * @param target 対象文字列
+     * @param trimString 削除する文字(列)
+     * @return 削除された文字列
+     */
+    public static String trim(final String target, final String trimString) {
+        if (target == null) {
+            return null;
+        }
+
+        // startWith, endWithの処理をする前に、それぞれが削除対象か否かを取得する
+        boolean startsWith = target.startsWith(trimString);
+        boolean endsWith = target.endsWith(trimString);
+
+        String result = target;
+        if (startsWith) {
+            while (result.startsWith(trimString)) {
+                result = result.substring(trimString.length());
+            }
+        }
+
+        if (endsWith && result.length() >= trimString.length()) {
+            while (result.endsWith(trimString)) {
+                result = result.substring(0, result.length() - trimString.length());
+            }
+        }
+
+        return result;
+    }
+
+    /**
      * 先頭および末尾にある空白文字(全角、半角)をすべて削除します。
      *
      * @param target 対象文字列
@@ -367,6 +399,7 @@ public class StringUtils {
         }
 
         final String pattern = HALF_KATAKANA_PATTERN + (containsSpace ? HALF_SPACE + FULL_SPACE : "");
+
         return target.matches("^[" + pattern + "]+$");
     }
 
@@ -400,6 +433,7 @@ public class StringUtils {
         Map<String, String> map = new HashMap<String, String>();
         map.putAll(FULL_HALF_UPPER);
         map.putAll(FULL_HALF_LOWER);
+
         return toHalfString(target, map);
     }
 
@@ -710,6 +744,7 @@ public class StringUtils {
         }
 
         final String[] strs = target.split("(?:\r\n|\r|\n)");
+
         return new LinkedList<>(Arrays.asList(strs));
     }
 
@@ -791,6 +826,7 @@ public class StringUtils {
             if (target.matches("^[a-z].*")) {
                 return target.substring(0, 1).toUpperCase() + target.substring(1, target.length());
             }
+            
             return target;
         }
 
@@ -815,6 +851,7 @@ public class StringUtils {
             if (target.matches("^[A-Z].*")) {
                 return target.substring(0, 1).toLowerCase() + target.substring(1, target.length());
             }
+
             return target;
         }
 
