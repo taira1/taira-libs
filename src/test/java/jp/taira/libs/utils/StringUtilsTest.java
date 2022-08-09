@@ -5,8 +5,7 @@ import org.junit.jupiter.api.Test;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class StringUtilsTest {
 
@@ -25,71 +24,98 @@ public class StringUtilsTest {
 
     @Test
     public void isEmptyTest() throws Exception {
-        assertEquals(StringUtils.isEmpty(null), true);
-        assertEquals(StringUtils.isEmpty(""), true);
-        assertEquals(StringUtils.isEmpty("  "), false);
+        assertTrue(StringUtils.isEmpty(null));
+        assertTrue(StringUtils.isEmpty(""));
+        assertFalse(StringUtils.isEmpty("  "));
 
-        assertEquals(StringUtils.isEmpty("AAA"), false);
+        assertFalse(StringUtils.isEmpty("AAA"));
     }
 
     @Test
     public void isBlankTest() throws Exception {
-        assertEquals(StringUtils.isBlank(null), true);
-        assertEquals(StringUtils.isBlank(""), true);
-        assertEquals(StringUtils.isBlank("  "), true);
+        assertTrue(StringUtils.isBlank(null));
+        assertTrue(StringUtils.isBlank(""));
+        assertTrue(StringUtils.isBlank("  "));
 
-        assertEquals(StringUtils.isBlank("AAA"), false);
+        assertFalse(StringUtils.isBlank("AAA"));
     }
 
     @Test
     public void startsWithTest() throws Exception {
-        assertEquals(StringUtils.startsWith(null, null), false);
-        assertEquals(StringUtils.startsWith(null, ""), false);
+        assertFalse(StringUtils.startsWith(null, null));
+        assertFalse(StringUtils.startsWith(null, ""));
         assertThrows(NullPointerException.class, () -> {
             StringUtils.startsWith(" ", null);
         });
-        assertEquals(StringUtils.startsWith(" ", ""), true);
-        assertEquals(StringUtils.startsWith("", ""), true);
+        assertTrue(StringUtils.startsWith(" ", ""));
+        assertTrue(StringUtils.startsWith("", ""));
 
-        assertEquals(StringUtils.startsWith("abc", ""), true);
-        assertEquals(StringUtils.startsWith("abc", "a"), true);
-        assertEquals(StringUtils.startsWith("abc", "A"), false);
-        assertEquals(StringUtils.startsWith("abc", "b"), false);
-        assertEquals(StringUtils.startsWith("abc", "B"), false);
-        assertEquals(StringUtils.startsWith("abc", "c"), false);
-        assertEquals(StringUtils.startsWith("abc", "C"), false);
-        assertEquals(StringUtils.startsWith("ABC", ""), true);
-        assertEquals(StringUtils.startsWith("ABC", "a"), false);
-        assertEquals(StringUtils.startsWith("ABC", "A"), true);
-        assertEquals(StringUtils.startsWith("ABC", "b"), false);
-        assertEquals(StringUtils.startsWith("ABC", "B"), false);
-        assertEquals(StringUtils.startsWith("ABC", "c"), false);
-        assertEquals(StringUtils.startsWith("ABC", "C"), false);
+        assertTrue(StringUtils.startsWith("abc", ""));
+        assertTrue(StringUtils.startsWith("abc", "a"));
+        assertFalse(StringUtils.startsWith("abc", "A"));
+        assertFalse(StringUtils.startsWith("abc", "b"));
+        assertFalse(StringUtils.startsWith("abc", "B"));
+        assertFalse(StringUtils.startsWith("abc", "c"));
+        assertFalse(StringUtils.startsWith("abc", "C"));
+        assertTrue(StringUtils.startsWith("ABC", ""));
+        assertFalse(StringUtils.startsWith("ABC", "a"));
+        assertTrue(StringUtils.startsWith("ABC", "A"));
+        assertFalse(StringUtils.startsWith("ABC", "b"));
+        assertFalse(StringUtils.startsWith("ABC", "B"));
+        assertFalse(StringUtils.startsWith("ABC", "c"));
+        assertFalse(StringUtils.startsWith("ABC", "C"));
     }
 
     @Test
     public void startsWithIgnoreCaseTest() throws Exception {
-        assertEquals(StringUtils.startsWithIgnoreCase(null, null), false);
-        assertEquals(StringUtils.startsWithIgnoreCase(null, ""), false);
+        assertFalse(StringUtils.startsWithIgnoreCase(null, null));
+        assertFalse(StringUtils.startsWithIgnoreCase(null, ""));
         assertThrows(NullPointerException.class, () -> {
             StringUtils.startsWithIgnoreCase(" ", null);
         });
-        assertEquals(StringUtils.startsWithIgnoreCase(" ", ""), true);
-        assertEquals(StringUtils.startsWithIgnoreCase("", ""), true);
+        assertTrue(StringUtils.startsWithIgnoreCase(" ", ""));
+        assertTrue(StringUtils.startsWithIgnoreCase("", ""));
 
-        assertEquals(StringUtils.startsWithIgnoreCase("abc", ""), true);
-        assertEquals(StringUtils.startsWithIgnoreCase("abc", "a"), true);
-        assertEquals(StringUtils.startsWithIgnoreCase("abc", "A"), true);
-        assertEquals(StringUtils.startsWithIgnoreCase("abc", "b"), false);
-        assertEquals(StringUtils.startsWithIgnoreCase("abc", "B"), false);
-        assertEquals(StringUtils.startsWithIgnoreCase("abc", "c"), false);
-        assertEquals(StringUtils.startsWithIgnoreCase("abc", "C"), false);
-        assertEquals(StringUtils.startsWithIgnoreCase("ABC", ""), true);
-        assertEquals(StringUtils.startsWithIgnoreCase("ABC", "a"), true);
-        assertEquals(StringUtils.startsWithIgnoreCase("ABC", "A"), true);
-        assertEquals(StringUtils.startsWithIgnoreCase("ABC", "b"), false);
-        assertEquals(StringUtils.startsWithIgnoreCase("ABC", "B"), false);
-        assertEquals(StringUtils.startsWithIgnoreCase("ABC", "c"), false);
-        assertEquals(StringUtils.startsWithIgnoreCase("ABC", "C"), false);
+        assertTrue(StringUtils.startsWithIgnoreCase("abc", ""));
+        assertTrue(StringUtils.startsWithIgnoreCase("abc", "a"));
+        assertTrue(StringUtils.startsWithIgnoreCase("abc", "A"));
+        assertFalse(StringUtils.startsWithIgnoreCase("abc", "b"));
+        assertFalse(StringUtils.startsWithIgnoreCase("abc", "B"));
+        assertFalse(StringUtils.startsWithIgnoreCase("abc", "c"));
+        assertFalse(StringUtils.startsWithIgnoreCase("abc", "C"));
+        assertTrue(StringUtils.startsWithIgnoreCase("ABC", ""));
+        assertTrue(StringUtils.startsWithIgnoreCase("ABC", "a"));
+        assertTrue(StringUtils.startsWithIgnoreCase("ABC", "A"));
+        assertFalse(StringUtils.startsWithIgnoreCase("ABC", "b"));
+        assertFalse(StringUtils.startsWithIgnoreCase("ABC", "B"));
+        assertFalse(StringUtils.startsWithIgnoreCase("ABC", "c"));
+        assertFalse(StringUtils.startsWithIgnoreCase("ABC", "C"));
+    }
+
+    @Test
+    public void endsWithTest() throws Exception {
+        assertFalse(StringUtils.endsWith(null, null));
+        assertFalse(StringUtils.endsWith(null, ""));
+        assertThrows(NullPointerException.class, () -> {
+            StringUtils.endsWith(" ", null);
+        });
+
+        assertTrue(StringUtils.endsWith(" ", ""));
+        assertTrue(StringUtils.endsWith("", ""));
+
+        assertTrue(StringUtils.endsWith("abc", ""));
+        assertFalse(StringUtils.endsWith("abc", "a"));
+        assertFalse(StringUtils.endsWith("abc", "A"));
+        assertFalse(StringUtils.endsWith("abc", "b"));
+        assertFalse(StringUtils.endsWith("abc", "B"));
+        assertTrue(StringUtils.endsWith("abc", "c"));
+        assertFalse(StringUtils.endsWith("abc", "C"));
+        assertTrue(StringUtils.endsWith("ABC", ""));
+        assertFalse(StringUtils.endsWith("ABC", "a"));
+        assertFalse(StringUtils.endsWith("ABC", "A"));
+        assertFalse(StringUtils.endsWith("ABC", "b"));
+        assertFalse(StringUtils.endsWith("ABC", "B"));
+        assertFalse(StringUtils.endsWith("ABC", "c"));
+        assertTrue(StringUtils.endsWith("ABC", "C"));
     }
 }
