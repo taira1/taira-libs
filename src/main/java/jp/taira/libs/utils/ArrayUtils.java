@@ -195,7 +195,7 @@ public class ArrayUtils {
             }
         }
 
-        return false;
+        return true;
     }
 
     /**
