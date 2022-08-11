@@ -21,12 +21,15 @@ public class BooleanUtils {
         if (StringUtils.isBlank(target)) {
             return null;
         }
+        
         if (target.equals("1") || target.equalsIgnoreCase(Boolean.TRUE.toString())) {
             return Boolean.TRUE;
         }
+
         if (target.equals("0") || target.equalsIgnoreCase(Boolean.FALSE.toString())) {
             return Boolean.FALSE;
         }
+
         return null;
     }
 
@@ -38,6 +41,7 @@ public class BooleanUtils {
         if (object == null) {
             return null;
         }
+
         return object.equals(Boolean.TRUE) ? 1 : 0;
     }
 }
