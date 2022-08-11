@@ -252,6 +252,7 @@ public class ArrayUtils {
                 total += value;
             }
         }
+
         return total;
     }
 
@@ -367,6 +368,7 @@ public class ArrayUtils {
                 T[] result = (T[])Array.newInstance(kind, length - 1);
                 System.arraycopy(array, 0, result, 0, i);
                 System.arraycopy(array, i + 1, result, i, length - i - 1);
+
                 return result;
             }
         }
