@@ -1158,25 +1158,4 @@ public class StringUtilsTest {
             assertTrue(StringUtils.isPhoneNumber("0120-999-999"));
         }
     }
-
-    @Test
-    public void encryptTest() throws Exception {
-        log.debug("encrypt(\"1234567890\") = {}", StringUtils.encrypt("1234567890"));
-        log.debug("encrypt(\"password\") = {}", StringUtils.encrypt("password"));
-        log.debug("encrypt(\"pass\") = {}", StringUtils.encrypt("pass"));
-        log.debug("encrypt(\"2FP$ eL-kx}2Ni}6fq\") = {}", StringUtils.encrypt("2FP$ eL-kx}2Ni}6fq"));
-
-        assertEquals(StringUtils.encrypt("pass"), "YYnIWK_2AafjfvkKaqKRwA");
-        assertEquals(StringUtils.encrypt("2FP$ eL-kx}2Ni}6fq"), "eoMintzQihaFD80nlRHOumEwKOIDntSY5tFm8dh_Q6s");
-
-        assertNotEquals(StringUtils.encrypt("1234567890"), "1234567890");
-    }
-
-    @Test
-    public void decryptTest() throws Exception {
-        assertEquals(StringUtils.decrypt("YYnIWK_2AafjfvkKaqKRwA"), "pass");
-        assertEquals(StringUtils.decrypt("eoMintzQihaFD80nlRHOumEwKOIDntSY5tFm8dh_Q6s="), "2FP$ eL-kx}2Ni}6fq");
-
-        assertEquals(StringUtils.decrypt("1234567890"), "1234567890");
-    }
 }
