@@ -1,0 +1,167 @@
+import groovy.io.FileType
+import org.openapitools.generator.gradle.plugin.tasks.GenerateTask
+import org.gradle.internal.os.OperatingSystem
+import org.apache.tools.ant.filters.FixCrLfFilter
+
+buildscript {
+    ext {
+        versions = [
+                'Java': '11',
+                // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot
+                'SpringBoot': '2.5.2',
+                // https://mvnrepository.com/artifact/org.projectlombok/lombok
+                'lombok': '1.18.20',
+                // https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-core
+                'log4j2': '2.17.1',
+        ]
+    }
+
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:${versions.SpringBoot}"
+    }
+}
+
+plugins {
+    id 'org.openapi.generator' version '5.3.0'
+}
+
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
+apply plugin: 'java'
+//apply plugin: 'org.openapi.generator'
+
+group = 'jp.taira'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = "${versions.Java}"
+
+repositories {
+    mavenCentral()
+    maven { url "https://repo.spring.io/snapshot" }
+    maven { url "https://repo.spring.io/milestone" }
+}
+
+configurations.all {
+    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+    exclude group: 'commons-logging', module: 'commons-logging'
+    exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
+    exclude group: 'org.springframework.boot', module: 'logback-classic'
+    exclude group: 'ch.qos.logback'
+    exclude group: 'log4j', module: 'log4j'
+    exclude group: 'org.slf4j', module: 'slf4j-log4j12'
+}
+
+dependencies {
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter'
+
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: "${versions.SpringBoot}"
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-security', version: "${versions.SpringBoot}"
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-aop', version: "${versions.SpringBoot}"
+    developmentOnly group: 'org.springframework.boot', name: 'spring-boot-devtools', version: "${versions.SpringBoot}"
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation', version: "${versions.SpringBoot}"
+    implementation 'org.springframework.boot:spring-boot-starter-log4j2:2.4.4'
+
+    implementation group: 'javax.persistence', name: 'javax.persistence-api', version: '2.2'
+
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: "${versions.log4j2}"
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: "${versions.log4j2}"
+
+    implementation group: 'io.swagger.core.v3', name: 'swagger-core', version: '2.1.10'
+
+    testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
+
+    implementation 'com.zaxxer:HikariCP:latest.release'
+    implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:2.2.0'
+
+    compileOnly "org.projectlombok:lombok:${versions.lombok}"
+    annotationProcessor "org.projectlombok:lombok:${versions.lombok}"
+
+    testCompileOnly "org.projectlombok:lombok:${versions.lombok}"
+    testAnnotationProcessor "org.projectlombok:lombok:${versions.lombok}"
+
+    implementation 'org.apache.commons:commons-lang3:3.1'
+    implementation 'org.modelmapper:modelmapper:latest.release'
+
+    implementation "org.openapitools:openapi-generator-gradle-plugin:5.2.1"
+    implementation 'org.openapitools:jackson-databind-nullable:latest.release'
+
+    implementation 'io.springfox:springfox-oas:3.0.0'
+
+//    implementation 'org.jxls:jxls-poi:1.0.11'
+    implementation 'org.apache.poi:poi-ooxml:latest.release'
+
+    implementation group: 'com.google.code.gson', name: 'gson', version: '2.9.0'
+
+    // test
+    testImplementation 'org.junit.jupiter:junit-jupiter:latest.release'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter:latest.release'
+
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: 'latest.release'
+    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-csv:latest.release'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+// eclipse
+// https://docs.gradle.org/current/userguide/eclipse_plugin.html
+apply plugin: 'eclipse'
+
+eclipse {
+    project {
+        buildCommand 'org.eclipse.buildship.core.gradleprojectbuilder'
+        natures 'org.eclipse.buildship.core.gradleprojectnature'
+    }
+
+    classpath {
+        file.whenMerged {
+            entries.each { entry ->
+                if (entry.kind == 'src' && entry.hasProperty('output')) {
+                    entry.output = entry.output.replace('bin/', "build/")
+                }
+            }
+        }
+    }
+}
+
+tasks.eclipse.doFirst {
+    File prefs = file(".settings/org.eclipse.buildship.core.prefs")
+    if (!prefs.exists()) {
+        prefs.append('''
+            connection.project.dir=
+            eclipse.preferences.version=1
+            '''.stripIndent())
+    }
+}
+
+// IntelliJ IDEA
+// https://docs.gradle.org/current/userguide/idea_plugin.html
+apply plugin: 'idea'
+
+idea {
+    module {
+        iml {
+            beforeMerged { module ->
+                module.dependencies.clear()
+            }
+        }
+    }
+
+    project {
+        ipr {
+            beforeMerged { project ->
+                project.modulePaths.clear()
+            }
+        }
+    }
+}
+
+bootRun {
+    jvmArgs "-Djava.locale.providers=COMPAT,CLDR"
+}
+
+// --------------------------
