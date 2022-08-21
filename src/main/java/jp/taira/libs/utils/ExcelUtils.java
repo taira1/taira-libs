@@ -2,18 +2,21 @@ package jp.taira.libs.utils;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.hssf.OldExcelFormatException;
-import org.apache.poi.ss.usermodel.PrintSetup;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.poifs.crypt.CryptoFunctions;
+import org.apache.poi.ss.formula.FormulaParseException;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.ss.util.CellReference;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Excelユーティリティクラス
@@ -271,5 +274,374 @@ public class ExcelUtils {
      */
     public static void removeSheet(final Workbook workbook, final String sheetName) {
         workbook.removeSheetAt(workbook.getSheetIndex(sheetName));
+    }
+
+    /**
+     * シートが、指定したパスワードで保護されているか判断する。
+     *
+     * @param sheet シート
+     * @param password パスワード
+     * @return 指定したシートが保護されている場合にtrue、指定したシートが保護されていない場合にfalseを返す。
+     */
+    public static boolean isProtectedSheet(final Sheet sheet, final String password) {
+        if (password == null) {
+            return false;
+        }
+
+        if (sheet instanceof HSSFSheet) {
+            return ((HSSFSheet)sheet).getPassword() == (short) CryptoFunctions.createXorVerifier1(password);
+        } else if (sheet instanceof XSSFSheet) {
+            return ((XSSFSheet)sheet).validateSheetPassword(password);
+        }
+
+        return false;
+    }
+
+    /**
+     * シートが保護されているか判断する。
+     *
+     * @param sheet シート
+     * @return 指定したシートが保護されている場合にtrue、指定したシートが保護されていない場合にfalseを返す。
+     */
+    public static boolean isProtectedSheet(final Sheet sheet) {
+        if (sheet == null) {
+            return false;
+        }
+
+        return sheet.getProtect();
+    }
+
+    /**
+     * 行を取得する。<br>
+     * 行が存在しない場合は、前の行を指定列まで書式をコピーして生成する。
+     *
+     * @param sheet シート
+     * @param rowIndex 行インデックス
+     * @param firstCol 開始列インデックス
+     * @param lastCol 終了列インデックス
+     * @return Rowオブジェクト
+     */
+    public static Row getRow(final Sheet sheet, final int rowIndex, final int firstCol, final int lastCol) {
+        if (sheet == null) {
+            log.error("sheet is null.");
+            return null;
+        }
+
+        if (rowIndex < 0) {
+            log.error("rowIndex({}) is invalid.", rowIndex);
+            return null;
+        }
+
+        if (firstCol < 0 || lastCol < 0) {
+            log.error("firstCol({}) / lastCol({}) is invalid.", firstCol, lastCol);
+            return null;
+        }
+
+        if (firstCol > lastCol) {
+            log.error("firstCol({}) / lastCol({}) is invalid.", firstCol, lastCol);
+            return null;
+        }
+
+        Row row = sheet.getRow(rowIndex);
+        if (row == null) {
+            final Row srcRow = sheet.getRow(rowIndex - 1);
+            if (srcRow == null) {
+                log.error("srcRow(rowIndex={}) is invalid.", rowIndex - 1);
+                return null;
+            }
+            row = sheet.createRow(rowIndex);
+
+            row.setHeight(srcRow.getHeight());
+
+            for (int i = firstCol; i <= lastCol; i++) {
+                final Cell srcCell = srcRow.getCell(i);
+                final Cell cell = row.createCell(i);
+
+                cell.setCellStyle(srcCell.getCellStyle());
+            }
+        } else {
+            //logger.debug("CellNum: " + row.getFirstCellNum() + " -> " + row.getLastCellNum());
+            for (int i = row.getLastCellNum(); i >= row.getFirstCellNum(); i--) {
+                if (i < 0) {
+                    continue;
+                }
+
+                final Cell cell = row.getCell(i);
+                if (cell == null) {
+                    continue;
+                }
+
+                if (i < firstCol || i > lastCol) {
+                    row.removeCell(cell);
+                }
+            }
+        }
+
+        return row;
+    }
+
+    /**
+     * セルを取得する。
+     *
+     * @param sheet シート
+     * @param row Rowオブジェクト
+     * @param colIndex 列インデックス
+     * @return Cellオブジェクト
+     */
+    public static Cell getCell(final Sheet sheet, final Row row, final int colIndex) {
+        if (sheet == null) {
+            log.error("sheet is null.");
+            return null;
+        }
+
+        if (row == null) {
+            log.error("row is null.");
+            return null;
+        }
+
+        if (colIndex < 0) {
+            log.error("colIndex({}) is invalid.", colIndex);
+            return null;
+        }
+
+        return row.getCell(colIndex);
+    }
+
+    /**
+     * セルを取得する。
+     *
+     * @param sheet シート
+     * @param rowIndex 行インデックス
+     * @param colIndex 列インデックス
+     * @return Cellオブジェクト
+     */
+    public static Cell getCell(final Sheet sheet, final int rowIndex, final int colIndex) {
+        if (sheet == null) {
+            log.error("sheet is null.");
+            return null;
+        }
+
+        return getCell(sheet, sheet.getRow(rowIndex), colIndex);
+    }
+
+    /**
+     * セルを取得する。<br>
+     * セルが存在しない場合は、生成する。
+     *
+     * @param sheet シート
+     * @param row Rowオブジェクト
+     * @param colIndex 列インデックス
+     * @return Cellオブジェクト
+     */
+    public static Cell getOrCreateCell(final Sheet sheet, final Row row, final int colIndex) {
+        final Cell cell = getCell(sheet, row, colIndex);
+        return cell != null ? cell : row.createCell(colIndex);
+    }
+
+    /**
+     * セルの書式を指定して、値を取得する。
+     *
+     * @param workbook ワークブック
+     * @param cell セル
+     * @param cellType セルの書式
+     * @return セルの値
+     */
+    public static Object getCellValue(final Workbook workbook, final Cell cell, final CellType cellType) {
+        if (workbook == null || cell == null) {
+            return null;
+        }
+
+        final String cellCoordinate = "(" + cell.getRowIndex() + "," + cell.getColumnIndex() + ")";
+        Object result;
+
+        if (cellType == CellType.BLANK) {
+            result = null;
+        } else if (cellType == CellType.BOOLEAN) {
+            result = cell.getBooleanCellValue();
+        } else if (cellType == CellType.ERROR) {
+            String errorResult;
+            try {
+                byte errorCode = cell.getErrorCellValue();
+                FormulaError formulaError = FormulaError.forInt(errorCode);
+                errorResult = formulaError.getString();
+            } catch (RuntimeException e) {
+                log.debug("Getting error code for {} failed!: {}", cellCoordinate, e.getMessage());
+                if (cell instanceof XSSFCell) {
+                    errorResult = ((XSSFCell)cell).getErrorCellString();
+                } else {
+                    log.error("Couldn't handle unexpected error scenario in cell: " + cellCoordinate, e);
+                    throw e;
+                }
+            }
+            result = errorResult;
+        } else if (cellType == CellType.FORMULA) {
+            result = getFormulaCellValue(workbook, cell);
+        } else if (cellType == CellType.NUMERIC) {
+            if (DateUtil.isCellDateFormatted(cell)) {
+                result = cell.getDateCellValue();
+            } else {
+                result = cell.getNumericCellValue();
+            }
+        } else if (cellType == CellType.STRING) {
+            /* xls -> HSSFRichTextString, xlsx -> XSSFRichTextString */
+            result = cell.getRichStringCellValue();
+        } else {
+            throw new IllegalStateException("Unknown cell type: " + cell.getCellType());
+        }
+
+        log.debug("cell{} resolved to value: {}", cellCoordinate, result);
+
+        return result;
+    }
+
+    /**
+     * セルの値を取得する。
+     *
+     * @param workbook ワークブック
+     * @param cell セル
+     * @return セルの値
+     */
+    public static Object getCellValue(final Workbook workbook, final Cell cell) {
+        if (cell == null) {
+            return null;
+        }
+
+        return getCellValue(workbook, cell, cell.getCellType());
+    }
+
+    /**
+     * セルの値を取得する。
+     *
+     * @param sheet シート
+     * @param cellName セル名
+     * @return セルの値
+     */
+    public static Object getCellValue(Sheet sheet, String cellName) {
+        CellReference cellReference = new CellReference(cellName);
+        Row row = sheet.getRow(cellReference.getRow());
+        if (row == null) {
+            return null;
+        }
+
+        return getCellValue(sheet.getWorkbook(), row.getCell(cellReference.getCol()));
+    }
+
+    /**
+     * セル(数式)の値を取得する。
+     *
+     * @param workbook ワークブック
+     * @param cell セル
+     * @return セルの値
+     */
+    protected static Object getFormulaCellValue(final Workbook workbook, final Cell cell) {
+        final CellType cachedFormulaResultType = cell.getCachedFormulaResultType();
+        try {
+            if (cachedFormulaResultType == CellType.NUMERIC) {
+                return cell.getNumericCellValue();
+            }
+            if (cachedFormulaResultType == CellType.STRING) {
+                return cell.getRichStringCellValue();
+            }
+        } catch (Exception e) {
+            log.error("Failed to fetch cached/precalculated formula value of cell: " + cell, e);
+        }
+
+        try {
+            log.info("cell({},{}) is a formula. Attempting to evaluate: {}", cell.getRowIndex(), cell.getColumnIndex(), cell.getCellFormula());
+            final FormulaEvaluator evaluator = workbook.getCreationHelper().createFormulaEvaluator();
+            final Cell evaluatedCell = evaluator.evaluateInCell(cell);
+            return getCellValue(workbook, evaluatedCell);
+        } catch (Exception e) {
+            log.warn("Exception occurred while evaluating formula at position ({},{}): {}", cell.getRowIndex(), cell.getColumnIndex(), e.getMessage());
+
+            if (e instanceof FormulaParseException) {
+                log.error("Parse exception occurred while evaluating cell formula: " + cell, e);
+            } else if (e instanceof IllegalArgumentException) {
+                log.error("Illegal formula argument occurred while evaluating cell formula: " + cell, e);
+            } else {
+                log.error("Unexpected exception occurred while evaluating cell formula: " + cell, e);
+            }
+        }
+
+        return cell.getCellFormula();
+    }
+
+    /**
+     * セル種別をセットする。
+     *
+     * @param cell セル
+     * @param cellType セル種別
+     */
+    public static void setCellType(final Cell cell, final CellType cellType) {
+        if (cell instanceof XSSFCell) {
+            ((XSSFCell)cell).setCellType(cellType);
+        } else if (cell instanceof HSSFCell) {
+            ((HSSFCell)cell).setCellType(cellType);
+        }
+    }
+
+    /**
+     * シートの条件付き書式をセットする。
+     *
+     * @param sheet シート
+     */
+    public static void conditionalFormat(final Sheet sheet) {
+        conditionalFormat(sheet, 0);
+    }
+
+    /**
+     * シートの条件付き書式をセットする。
+     *
+     * @param sheet シート
+     * @param rowIndexFrom 開始行インデックス
+     */
+    public static void conditionalFormat(final Sheet sheet, final int rowIndexFrom) {
+        final SheetConditionalFormatting formatting = sheet.getSheetConditionalFormatting();
+        for (int i = 0; i < formatting.getNumConditionalFormattings(); i++) {
+            final ConditionalFormatting format = formatting.getConditionalFormattingAt(i);
+            final CellRangeAddress[] ranges = format.getFormattingRanges();
+            if (rowIndexFrom <= ranges[0].getFirstRow()) {
+                for (CellRangeAddress range : ranges) {
+                    range.setLastRow(sheet.getLastRowNum());
+                }
+                format.setFormattingRanges(ranges);
+            }
+        }
+    }
+
+    /**
+     * ワークブックからバイト配列を取得する。
+     *
+     * @param workbook ワークブック
+     * @return バイト配列
+     */
+    public static byte[] getBytes(final Workbook workbook) {
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            workbook.write(baos);
+            return baos.toByteArray();
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Excelファイルを指定パスに出力する。
+     *
+     * @param workbook ワークブック
+     * @param path ファイルのパス
+     */
+    public static void output(final Workbook workbook, final Path path) {
+        try (BufferedInputStream bis = new BufferedInputStream(new ByteArrayInputStream(Objects.requireNonNull(getBytes(workbook))));
+             BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(path.toAbsolutePath().toString()))) {
+            byte[] buff = new byte[4096];
+            int len = 0;
+            while ((len = bis.read(buff)) != -1) {
+                bos.write(buff, 0, len);
+            }
+            bos.flush();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }
