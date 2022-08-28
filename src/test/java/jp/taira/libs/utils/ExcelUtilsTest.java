@@ -1,6 +1,8 @@
 package jp.taira.libs.utils;
 
 import org.apache.poi.hssf.OldExcelFormatException;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -23,7 +25,7 @@ public class ExcelUtilsTest {
     }
 
     private Path getResourceFile(final String path) {
-        URI resourceUri = null;
+        URI resourceUri;
         try {
             resourceUri = Objects.requireNonNull(getClass().getClassLoader().getResource(path)).toURI();
             return Paths.get(resourceUri);
@@ -75,5 +77,134 @@ public class ExcelUtilsTest {
             InputStream inputStream = new FileInputStream(getResourceFile("testExcel/test.xlsx").toFile());
             assertNotNull(ExcelUtils.getWorkbook(inputStream));
         });
+    }
+
+    @Test
+    public void getWorkbookTest_Path() {
+        assertNull(ExcelUtils.getWorkbook(Paths.get("")));
+        assertNull(ExcelUtils.getWorkbook(getResourceFile("testFile.txt")));
+
+        assertNotNull(ExcelUtils.getWorkbook(getResourceFile("testExcel/empty.xls")));
+        assertNotNull(ExcelUtils.getWorkbook(getResourceFile("testExcel/empty.xlsx")));
+        assertNotNull(ExcelUtils.getWorkbook(getResourceFile("testExcel/test.xls")));
+        assertNotNull(ExcelUtils.getWorkbook(getResourceFile("testExcel/test.xlsx")));
+    }
+
+    @Test
+    public void getSheetTest() {
+        // null
+        assertNull(ExcelUtils.getSheet(null));
+
+        { /* xls */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test.xls"));
+            final Sheet sheet = ExcelUtils.getSheet(workbook);
+
+            assertNotNull(sheet);
+        }
+
+        { /* xlsx */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test.xlsx"));
+            final Sheet sheet = ExcelUtils.getSheet(workbook);
+
+            assertNotNull(sheet);
+        }
+
+        { /* インデックス(正常) */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test.xls"));
+            final Sheet sheet = ExcelUtils.getSheet(workbook, 0);
+
+            assertNotNull(sheet);
+        }
+
+        { /* インデックス(マイナス) */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test.xls"));
+            final Sheet sheet = ExcelUtils.getSheet(workbook, -1);
+
+            assertNull(sheet);
+        }
+
+        { /* インデックス(異常プラス) */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test.xls"));
+            final Sheet sheet = ExcelUtils.getSheet(workbook, 9999);
+
+            assertNull(sheet);
+        }
+
+        { /* シート名(正常) */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test.xls"));
+            final Sheet sheet = ExcelUtils.getSheet(workbook, "Sheet1");
+
+            assertNotNull(sheet);
+        }
+
+        { /* シート名(null) */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test.xls"));
+            final Sheet sheet = ExcelUtils.getSheet(workbook, null);
+
+            assertNull(sheet);
+        }
+
+        { /* シート名(空) */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test.xls"));
+            final Sheet sheet = ExcelUtils.getSheet(workbook, "");
+
+            assertNull(sheet);
+        }
+
+        { /* シート名(存在しない) */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test.xls"));
+            final Sheet sheet = ExcelUtils.getSheet(workbook, "Sheet9999");
+
+            assertNull(sheet);
+        }
+
+        { /* インデックス(正常) */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test.xlsx"));
+            final Sheet sheet = ExcelUtils.getSheet(workbook, 0);
+
+            assertNotNull(sheet);
+        }
+
+        { /* インデックス(マイナス) */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test.xlsx"));
+            final Sheet sheet = ExcelUtils.getSheet(workbook, -1);
+
+            assertNull(sheet);
+        }
+
+        { /* インデックス(異常プラス) */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test.xlsx"));
+            final Sheet sheet = ExcelUtils.getSheet(workbook, 9999);
+
+            assertNull(sheet);
+        }
+
+        { /* シート名(正常) */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test.xlsx"));
+            final Sheet sheet = ExcelUtils.getSheet(workbook, "Sheet1");
+
+            assertNotNull(sheet);
+        }
+
+        { /* シート名(null) */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test.xlsx"));
+            final Sheet sheet = ExcelUtils.getSheet(workbook, null);
+
+            assertNull(sheet);
+        }
+
+        { /* シート名(空) */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test.xlsx"));
+            final Sheet sheet = ExcelUtils.getSheet(workbook, "");
+
+            assertNull(sheet);
+        }
+
+        { /* シート名(存在しない) */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test.xlsx"));
+            final Sheet sheet = ExcelUtils.getSheet(workbook, "Sheet9999");
+
+            assertNull(sheet);
+        }
     }
 }
