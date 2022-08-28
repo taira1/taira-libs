@@ -14,6 +14,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -205,6 +206,120 @@ public class ExcelUtilsTest {
             final Sheet sheet = ExcelUtils.getSheet(workbook, "Sheet9999");
 
             assertNull(sheet);
+        }
+    }
+
+    @Test
+    public void createSheetTest() {
+        { /* null */
+            final Sheet sheet = ExcelUtils.createSheet(null, null, null);
+
+            assertNull(sheet);
+        }
+
+        { /* null */
+            final Sheet sheet = ExcelUtils.createSheet(null, "templateSheetName", "sheetName");
+
+            assertNull(sheet);
+        }
+
+        { /* シート名(null) */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test.xls"));
+            final Sheet sheet = ExcelUtils.createSheet(workbook, null, "sheetName");
+
+            assertNull(sheet);
+        }
+
+        { /* シート名(null) */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test.xls"));
+            final Sheet sheet = ExcelUtils.createSheet(workbook, "templateSheetName", null);
+
+            assertNull(sheet);
+        }
+
+        { /* シート名(null) */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test.xls"));
+            final Sheet sheet = ExcelUtils.createSheet(workbook, "Sheet1", null);
+
+            assertNull(sheet);
+        }
+
+        { /* シート名(空) */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test.xls"));
+            final Sheet sheet = ExcelUtils.createSheet(workbook, "Sheet1", "");
+
+            assertNull(sheet);
+        }
+
+        { /* 通常 */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test.xls"));
+            final int sheetNum = Objects.requireNonNull(workbook).getNumberOfSheets();
+            final Sheet sheet = ExcelUtils.createSheet(workbook, "Sheet1", "Sheet9");
+
+            assertNotNull(sheet);
+            assertEquals(sheet.getSheetName(), "Sheet9");
+            assertNotNull(workbook.getSheet("Sheet9"));
+            // テンプレートシートは存在しない。
+            assertNull(workbook.getSheet("Sheet1"));
+            assertEquals(workbook.getNumberOfSheets(), sheetNum);
+        }
+
+        { /* シート名(null) */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test.xlsx"));
+            final Sheet sheet = ExcelUtils.createSheet(workbook, null, "sheetName");
+
+            assertNull(sheet);
+        }
+
+        { /* シート名(null) */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test.xlsx"));
+            final Sheet sheet = ExcelUtils.createSheet(workbook, "templateSheetName", null);
+
+            assertNull(sheet);
+        }
+
+        { /* シート名(null) */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test.xlsx"));
+            final Sheet sheet = ExcelUtils.createSheet(workbook, "Sheet1", null);
+
+            assertNull(sheet);
+        }
+
+        { /* シート名(空) */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test.xlsx"));
+            final Sheet sheet = ExcelUtils.createSheet(workbook, "Sheet1", "");
+
+            assertNull(sheet);
+        }
+
+        { /* 通常 */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test.xlsx"));
+            final int sheetNum = Objects.requireNonNull(workbook).getNumberOfSheets();
+            final Sheet sheet = ExcelUtils.createSheet(workbook, "Sheet1", "Sheet9");
+
+            assertNotNull(sheet);
+            assertEquals(sheet.getSheetName(), "Sheet9");
+            assertNotNull(workbook.getSheet("Sheet9"));
+            // テンプレートシートは存在しない。
+            assertNull(workbook.getSheet("Sheet1"));
+            assertEquals(workbook.getNumberOfSheets(), sheetNum);
+        }
+    }
+
+    @Test
+    public void createSheetsTest() {
+        { /* 通常 */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test.xlsx"));
+            final String[] sheetNameArray = new String[]{ "Sheet10", "Sheet11", "Sheet12" };
+            final List<Sheet> sheetList = ExcelUtils.createSheets(workbook, "Sheet1", sheetNameArray);
+
+            assertNotNull(sheetList);
+            assertEquals(sheetList.get(0).getSheetName(), "Sheet10");
+            assertEquals(sheetList.get(1).getSheetName(), "Sheet11");
+            assertEquals(sheetList.get(2).getSheetName(), "Sheet12");
+            // テンプレートシートは存在しない。
+            assertNull(Objects.requireNonNull(workbook).getSheet("Sheet1"));
+            assertEquals(workbook.getNumberOfSheets(), sheetNameArray.length);
         }
     }
 }
