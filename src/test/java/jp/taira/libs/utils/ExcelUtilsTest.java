@@ -1,6 +1,7 @@
 package jp.taira.libs.utils;
 
 import org.apache.poi.hssf.OldExcelFormatException;
+import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.junit.jupiter.api.BeforeEach;
@@ -544,6 +545,171 @@ public class ExcelUtilsTest {
         { /* シート名(空) */
             final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test.xlsx"));
             assertThrows(Exception.class, () -> ExcelUtils.removeSheet(Objects.requireNonNull(workbook), ""));
+        }
+    }
+
+    @Test
+    public void isProtectedSheetTest() {
+        { /* null */
+            assertFalse(ExcelUtils.isProtectedSheet(null));
+        }
+
+        { /* false */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test.xls"));
+            final Sheet sheet = ExcelUtils.getSheet(workbook, 0);
+
+            assertFalse(ExcelUtils.isProtectedSheet(sheet));
+        }
+
+        { /* true */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test-protected.xls"));
+            final Sheet sheet = ExcelUtils.getSheet(workbook, 0);
+
+            assertTrue(ExcelUtils.isProtectedSheet(sheet));
+        }
+
+        { /* false */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test.xlsx"));
+            final Sheet sheet = ExcelUtils.getSheet(workbook, 0);
+
+            assertFalse(ExcelUtils.isProtectedSheet(sheet));
+        }
+
+        { /* true */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test-protected.xlsx"));
+            final Sheet sheet = ExcelUtils.getSheet(workbook, 0);
+
+            assertTrue(ExcelUtils.isProtectedSheet(sheet));
+        }
+    }
+
+    @Test
+    public void isProtectedSheetTest_パスワード検証() {
+        { /* null */
+            assertFalse(ExcelUtils.isProtectedSheet(null, null));
+        }
+
+        { /* false */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test.xls"));
+            final Sheet sheet = ExcelUtils.getSheet(workbook, 0);
+
+            assertFalse(ExcelUtils.isProtectedSheet(sheet, null));
+        }
+
+        { /* false */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test-protected.xls"));
+            final Sheet sheet = ExcelUtils.getSheet(workbook, 0);
+
+            assertFalse(ExcelUtils.isProtectedSheet(sheet, "1234"));
+        }
+
+        { /* true */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test-protected.xls"));
+            final Sheet sheet = ExcelUtils.getSheet(workbook, 0);
+
+            assertTrue(ExcelUtils.isProtectedSheet(sheet, "pass"));
+        }
+
+        { /* false */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test.xlsx"));
+            final Sheet sheet = ExcelUtils.getSheet(workbook, 0);
+
+            assertFalse(ExcelUtils.isProtectedSheet(sheet, null));
+        }
+
+        { /* false */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test-protected.xlsx"));
+            final Sheet sheet = ExcelUtils.getSheet(workbook, 0);
+
+            assertFalse(ExcelUtils.isProtectedSheet(sheet, "1234"));
+        }
+
+        { /* true */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test-protected.xlsx"));
+            final Sheet sheet = ExcelUtils.getSheet(workbook, 0);
+
+            assertTrue(ExcelUtils.isProtectedSheet(sheet, "pass"));
+        }
+    }
+
+    @Test
+    public void getRowTest_行0() {
+        { /* null */
+            final Row row = ExcelUtils.getRow(null, 0, 0, 0);
+
+            assertNull(row);
+        }
+
+        { /* 通常 */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test.xls"));
+            final Sheet sheet = ExcelUtils.getSheet(workbook, 0);
+            final Row row = ExcelUtils.getRow(sheet, 0, 0, 0);
+
+            assertNotNull(row);
+            assertEquals(row.getRowNum(), 0);
+            assertEquals(row.getPhysicalNumberOfCells(), 1);
+            assertEquals(row.getFirstCellNum(), 0);
+            assertEquals(row.getLastCellNum(), 1);
+        }
+
+        { /* 通常 */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test.xls"));
+            final Sheet sheet = ExcelUtils.getSheet(workbook, 0);
+            final Row row = ExcelUtils.getRow(sheet, 0, 1, 1);
+
+            assertNotNull(row);
+            assertEquals(row.getRowNum(), 0);
+            assertEquals(row.getPhysicalNumberOfCells(), 1);
+            assertEquals(row.getFirstCellNum(), 1);
+            assertEquals(row.getLastCellNum(), 2);
+        }
+
+        { /* 通常 */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test.xls"));
+            final Sheet sheet = ExcelUtils.getSheet(workbook, 0);
+            final Row row = ExcelUtils.getRow(sheet, 0, 0, 1);
+
+            assertNotNull(row);
+            assertEquals(row.getRowNum(), 0);
+            assertEquals(row.getPhysicalNumberOfCells(), 2);
+            assertEquals(row.getFirstCellNum(), 0);
+            assertEquals(row.getLastCellNum(), 2);
+        }
+
+        { /* 通常 */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test.xlsx"));
+            final Sheet sheet = ExcelUtils.getSheet(workbook, 0);
+            final Row row = ExcelUtils.getRow(sheet, 0, 0, 0);
+
+            assertNotNull(row);
+            assertEquals(row.getRowNum(), 0);
+            assertEquals(row.getPhysicalNumberOfCells(), 1);
+            assertEquals(row.getFirstCellNum(), 0);
+            assertEquals(row.getLastCellNum(), 1);
+        }
+
+        { /* 通常 */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test.xlsx"));
+            final Sheet sheet = ExcelUtils.getSheet(workbook, 0);
+            final Row row = ExcelUtils.getRow(sheet, 0, 1, 1);
+
+            assertNotNull(row);
+            assertEquals(row.getRowNum(), 0);
+            assertEquals(row.getPhysicalNumberOfCells(), 1);
+            assertEquals(row.getFirstCellNum(), 1);
+            assertEquals(row.getLastCellNum(), 2);
+        }
+
+        { /* 通常 */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test.xlsx"));
+            final Sheet sheet = ExcelUtils.getSheet(workbook, 0);
+            final Row row = ExcelUtils.getRow(sheet, 0, 0, 1);
+
+            assertNotNull(row);
+            assertEquals(row.getRowNum(), 0);
+            assertEquals(row.getPhysicalNumberOfCells(), 2);
+            assertEquals(row.getFirstCellNum(), 0);
+            assertEquals(row.getLastCellNum(), 2);
         }
     }
 }
