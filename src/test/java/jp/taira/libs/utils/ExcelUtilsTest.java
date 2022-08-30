@@ -464,4 +464,86 @@ public class ExcelUtilsTest {
             assertNotNull(ExcelUtils.getSheet(workbook, "Sheet2"));
         }
     }
+
+    @Test
+    public void removeSheetTest_シート名() {
+        { /* xls */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test.xls"));
+            final int sheetNum = Objects.requireNonNull(workbook).getNumberOfSheets();
+            ExcelUtils.removeSheet(workbook, "Sheet1");
+
+            assertNotNull(workbook);
+            assertEquals(workbook.getNumberOfSheets(), sheetNum - 1);
+            assertNull(ExcelUtils.getSheet(workbook, "Sheet1"));
+        }
+
+        { /* xls */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test-multi.xls"));
+            final int sheetNum = Objects.requireNonNull(workbook).getNumberOfSheets();
+            ExcelUtils.removeSheet(workbook, "Sheet1");
+
+            assertNotNull(workbook);
+            assertEquals(workbook.getNumberOfSheets(), sheetNum - 1);
+            assertNull(ExcelUtils.getSheet(workbook, "Sheet1"));
+            assertNotNull(ExcelUtils.getSheet(workbook, "Sheet2"));
+        }
+
+        { /* xlsx */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test.xlsx"));
+            final int sheetNum = Objects.requireNonNull(workbook).getNumberOfSheets();
+            ExcelUtils.removeSheet(workbook, "Sheet1");
+
+            assertNotNull(workbook);
+            assertEquals(workbook.getNumberOfSheets(), sheetNum - 1);
+            assertNull(ExcelUtils.getSheet(workbook, "Sheet1"));
+        }
+
+        { /* xlsx */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test-multi.xlsx"));
+            final int sheetNum = Objects.requireNonNull(workbook).getNumberOfSheets();
+            ExcelUtils.removeSheet(workbook, "Sheet1");
+
+            assertNotNull(workbook);
+            assertEquals(workbook.getNumberOfSheets(), sheetNum - 1);
+            assertNull(ExcelUtils.getSheet(workbook, "Sheet1"));
+            assertNotNull(ExcelUtils.getSheet(workbook, "Sheet2"));
+        }
+    }
+
+    @Test
+    public void removeSheetTest_異常() {
+        { /* null */
+            assertThrows(Exception.class, () -> ExcelUtils.removeSheet(null, null));
+        }
+
+        { /* null */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test.xls"));
+            assertThrows(Exception.class, () -> ExcelUtils.removeSheet(Objects.requireNonNull(workbook), null));
+        }
+
+        { /* インデックス(マイナス) */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test.xls"));
+            assertThrows(Exception.class, () -> ExcelUtils.removeSheet(Objects.requireNonNull(workbook), -1));
+        }
+
+        { /* シート名(空) */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test.xls"));
+            assertThrows(Exception.class, () -> ExcelUtils.removeSheet(Objects.requireNonNull(workbook), ""));
+        }
+
+        { /* null */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test.xlsx"));
+            assertThrows(Exception.class, () -> ExcelUtils.removeSheet(Objects.requireNonNull(workbook), null));
+        }
+
+        { /* インデックス(マイナス) */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test.xlsx"));
+            assertThrows(Exception.class, () -> ExcelUtils.removeSheet(Objects.requireNonNull(workbook), -1));
+        }
+
+        { /* シート名(空) */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test.xlsx"));
+            assertThrows(Exception.class, () -> ExcelUtils.removeSheet(Objects.requireNonNull(workbook), ""));
+        }
+    }
 }
