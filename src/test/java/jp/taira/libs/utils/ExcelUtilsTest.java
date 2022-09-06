@@ -827,4 +827,87 @@ public class ExcelUtilsTest {
             assertNull(row);
         }
     }
+
+    @Test
+    public void getRowTest_範囲() {
+        { /* 範囲が異常値 */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test.xls"));
+            final Sheet sheet = ExcelUtils.getSheet(workbook, 0);
+            final Row row = ExcelUtils.getRow(sheet, 9999, 0, 1);
+
+            assertNull(row);
+        }
+
+        { /* 範囲が逆転 */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test.xls"));
+            final Sheet sheet = ExcelUtils.getSheet(workbook, 0);
+            final Row row = ExcelUtils.getRow(sheet, 0, 1, 0);
+
+            assertNull(row);
+        }
+
+        { /* 範囲外 */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test.xls"));
+            final Sheet sheet = ExcelUtils.getSheet(workbook, 0);
+            final Row row = ExcelUtils.getRow(sheet, 0, 0, 99);
+
+            assertNotNull(row);
+            assertEquals(row.getRowNum(), 0);
+            assertEquals(row.getPhysicalNumberOfCells(), 2);
+            assertEquals(row.getFirstCellNum(), 0);
+            assertEquals(row.getLastCellNum(), 2);
+        }
+
+        { /* 範囲外 */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test.xls"));
+            final Sheet sheet = ExcelUtils.getSheet(workbook, 0);
+            final Row row = ExcelUtils.getRow(sheet, 0, 99, 999);
+
+            assertNotNull(row);
+            assertEquals(row.getRowNum(), 0);
+            assertEquals(row.getPhysicalNumberOfCells(), 0);
+            assertEquals(row.getFirstCellNum(), -1);
+            assertEquals(row.getLastCellNum(), -1);
+        }
+
+        { /* 範囲が異常値 */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test.xlsx"));
+            final Sheet sheet = ExcelUtils.getSheet(workbook, 0);
+            final Row row = ExcelUtils.getRow(sheet, 9999, 0, 1);
+
+            assertNull(row);
+        }
+
+        { /* 範囲が逆転 */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test.xlsx"));
+            final Sheet sheet = ExcelUtils.getSheet(workbook, 0);
+            final Row row = ExcelUtils.getRow(sheet, 0, 1, 0);
+
+            assertNull(row);
+        }
+
+        { /* 範囲外 */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test.xlsx"));
+            final Sheet sheet = ExcelUtils.getSheet(workbook, 0);
+            final Row row = ExcelUtils.getRow(sheet, 0, 0, 99);
+
+            assertNotNull(row);
+            assertEquals(row.getRowNum(), 0);
+            assertEquals(row.getPhysicalNumberOfCells(), 2);
+            assertEquals(row.getFirstCellNum(), 0);
+            assertEquals(row.getLastCellNum(), 2);
+        }
+
+        { /* 範囲外 */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test.xlsx"));
+            final Sheet sheet = ExcelUtils.getSheet(workbook, 0);
+            final Row row = ExcelUtils.getRow(sheet, 0, 99, 999);
+
+            assertNotNull(row);
+            assertEquals(row.getRowNum(), 0);
+            assertEquals(row.getPhysicalNumberOfCells(), 0);
+            assertEquals(row.getFirstCellNum(), -1);
+            assertEquals(row.getLastCellNum(), -1);
+        }
+    }
 }
