@@ -712,4 +712,119 @@ public class ExcelUtilsTest {
             assertEquals(row.getLastCellNum(), 2);
         }
     }
+
+    @Test
+    public void getRowTest_マイナス() {
+        { /* インデックス(マイナス) */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test.xls"));
+            final Sheet sheet = ExcelUtils.getSheet(workbook, 0);
+            final Row row = ExcelUtils.getRow(sheet, 0, -1, 0);
+
+            assertNull(row);
+        }
+
+        { /* インデックス(マイナス) */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test.xls"));
+            final Sheet sheet = ExcelUtils.getSheet(workbook, 0);
+            final Row row = ExcelUtils.getRow(sheet, 0, -1, 0);
+
+            assertNull(row);
+        }
+
+        { /* インデックス(マイナス) */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test.xls"));
+            final Sheet sheet = ExcelUtils.getSheet(workbook, 0);
+            final Row row = ExcelUtils.getRow(sheet, 0, 0, -1);
+
+            assertNull(row);
+        }
+
+        { /* インデックス(マイナス) */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test.xls"));
+            final Sheet sheet = ExcelUtils.getSheet(workbook, 0);
+            final Row row = ExcelUtils.getRow(sheet, -1, -1, 0);
+
+            assertNull(row);
+        }
+
+        { /* インデックス(マイナス) */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test.xls"));
+            final Sheet sheet = ExcelUtils.getSheet(workbook, 0);
+            final Row row = ExcelUtils.getRow(sheet, 0, -1, -1);
+
+            assertNull(row);
+        }
+
+        { /* インデックス(マイナス) */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test.xls"));
+            final Sheet sheet = ExcelUtils.getSheet(workbook, 0);
+            final Row row = ExcelUtils.getRow(sheet, -1, 0, -1);
+
+            assertNull(row);
+        }
+
+        { /* インデックス(マイナス) */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test.xls"));
+            final Sheet sheet = ExcelUtils.getSheet(workbook, 0);
+            final Row row = ExcelUtils.getRow(sheet, -1, -1, -1);
+
+            assertNull(row);
+        }
+
+        { /* インデックス(マイナス) */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test.xlsx"));
+            final Sheet sheet = ExcelUtils.getSheet(workbook, 0);
+            final Row row = ExcelUtils.getRow(sheet, -1, 0, 0);
+
+            assertNull(row);
+        }
+
+        { /* インデックス(マイナス) */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test.xlsx"));
+            final Sheet sheet = ExcelUtils.getSheet(workbook, 0);
+            final Row row = ExcelUtils.getRow(sheet, 0, -1, 0);
+
+            assertNull(row);
+        }
+
+        { /* インデックス(マイナス) */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test.xlsx"));
+            final Sheet sheet = ExcelUtils.getSheet(workbook, 0);
+            final Row row = ExcelUtils.getRow(sheet, 0, 0, -1);
+
+            assertNull(row);
+        }
+
+        { /* インデックス(マイナス) */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test.xlsx"));
+            final Sheet sheet = ExcelUtils.getSheet(workbook, 0);
+            final Row row = ExcelUtils.getRow(sheet, -1, -1, 0);
+
+            assertNull(row);
+        }
+
+        { /* インデックス(マイナス) */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test.xlsx"));
+            final Sheet sheet = ExcelUtils.getSheet(workbook, 0);
+            final Row row = ExcelUtils.getRow(sheet, 0, -1, -1);
+
+            assertNull(row);
+        }
+
+        { /* インデックス(マイナス) */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test.xlsx"));
+            final Sheet sheet = ExcelUtils.getSheet(workbook, 0);
+            final Row row = ExcelUtils.getRow(sheet, -1, 0, -1);
+
+            assertNull(row);
+        }
+
+        { /* インデックス(マイナス) */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test.xlsx"));
+            final Sheet sheet = ExcelUtils.getSheet(workbook, 0);
+            final Row row = ExcelUtils.getRow(sheet, -1, -1, -1);
+
+            assertNull(row);
+        }
+    }
 }
