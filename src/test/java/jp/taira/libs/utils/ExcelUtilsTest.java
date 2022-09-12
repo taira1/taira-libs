@@ -1,10 +1,12 @@
 package jp.taira.libs.utils;
 
 import org.apache.poi.hssf.OldExcelFormatException;
+import org.apache.poi.hssf.usermodel.HSSFRichTextString;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFRichTextString;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -16,6 +18,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -982,6 +985,122 @@ public class ExcelUtilsTest {
             final Cell cell = ExcelUtils.getCell(sheet, 0, 0);
 
             assertNotNull(cell);
+        }
+    }
+
+    @Test
+    public void getCellValueTest_xls() {
+        { /* null */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test-cell.xls"));
+            final Object value = ExcelUtils.getCellValue(workbook, null);
+
+            assertNull(value);
+        }
+
+        { /* null */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test-cell.xls"));
+            final Sheet sheet = ExcelUtils.getSheet(workbook, 0);
+            final Cell cell = ExcelUtils.getCell(sheet, 0, 0);
+            final Object value = ExcelUtils.getCellValue(null, cell);
+
+            assertNull(value);
+        }
+
+        { /* 通常(標準セル - 文字列) */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test-cell.xls"));
+            final Sheet sheet = ExcelUtils.getSheet(workbook, 0);
+            final Cell cell = ExcelUtils.getCell(sheet, 0, 0);
+            final Object value = ExcelUtils.getCellValue(workbook, cell);
+
+            assertNotNull(value);
+            assertTrue(value instanceof HSSFRichTextString);
+            assertEquals(((HSSFRichTextString)value).toString(), "testA1");
+        }
+
+        { /* 通常(標準セル - 数値) */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test-cell.xls"));
+            final Sheet sheet = ExcelUtils.getSheet(workbook, 0);
+            final Cell cell = ExcelUtils.getCell(sheet, 1, 0);
+            final Object value = ExcelUtils.getCellValue(workbook, cell);
+
+            assertNotNull(value);
+            assertTrue(value instanceof Double);
+            assertEquals(value, 1.0);
+        }
+
+        { /* 通常(数値セル - 数値) */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test-cell.xls"));
+            final Sheet sheet = ExcelUtils.getSheet(workbook, 0);
+            final Cell cell = ExcelUtils.getCell(sheet, 2, 0);
+            final Object value = ExcelUtils.getCellValue(workbook, cell);
+
+            assertNotNull(value);
+            assertTrue(value instanceof Double);
+            assertEquals(value, 3.0);
+        }
+
+        { /* 通常(空白セル) */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test-cell.xls"));
+            final Sheet sheet = ExcelUtils.getSheet(workbook, 0);
+            final Cell cell = ExcelUtils.getCell(sheet, 3, 0);
+            final Object value = ExcelUtils.getCellValue(workbook, cell);
+
+            assertNull(value);
+        }
+
+        { /* 通常(標準セル - 空白3文字) */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test-cell.xls"));
+            final Sheet sheet = ExcelUtils.getSheet(workbook, 0);
+            final Cell cell = ExcelUtils.getCell(sheet, 4, 0);
+            final Object value = ExcelUtils.getCellValue(workbook, cell);
+
+            assertNotNull(value);
+            assertTrue(value instanceof HSSFRichTextString);
+            assertEquals(((HSSFRichTextString)value).toString(), "   ");
+        }
+
+        { /* 通常(日付セル) */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test-cell.xls"));
+            final Sheet sheet = ExcelUtils.getSheet(workbook, 0);
+            final Cell cell = ExcelUtils.getCell(sheet, 5, 0);
+            final Object value = ExcelUtils.getCellValue(workbook, cell);
+
+            assertNotNull(value);
+            assertTrue(value instanceof Date);
+            assertEquals(value, DateTimeUtils.parseToDate("2019" + DateTimeUtils.DATE_SPLIT + "01" + DateTimeUtils.DATE_SPLIT + "01", DateTimeUtils.DATE_FORMAT));
+        }
+
+        { /* 通常(真偽) */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test-cell.xls"));
+            final Sheet sheet = ExcelUtils.getSheet(workbook, 0);
+            final Cell cell = ExcelUtils.getCell(sheet, 6, 0);
+            final Object value = ExcelUtils.getCellValue(workbook, cell);
+
+            assertNotNull(value);
+            assertTrue(value instanceof Boolean);
+            assertEquals(value, Boolean.TRUE);
+        }
+
+        { /* 通常(エラー) */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test-cell.xls"));
+            final Sheet sheet = ExcelUtils.getSheet(workbook, 0);
+            final Cell cell = ExcelUtils.getCell(sheet, 7, 0);
+            final Object value = ExcelUtils.getCellValue(workbook, cell);
+
+            assertNotNull(value);
+            assertTrue(value instanceof String);
+            assertEquals(value, "#DIV/0!");
+        }
+
+        { /* 通常(数式 - 数値) */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test-cell.xls"));
+            final Sheet sheet = ExcelUtils.getSheet(workbook, 0);
+            final Cell cell = ExcelUtils.getCell(sheet, 8, 0);
+            final Object value = ExcelUtils.getCellValue(workbook, cell);
+
+            assertNotNull(value);
+            assertTrue(value instanceof Double);
+            assertEquals(value, 3.0);
         }
     }
 }
