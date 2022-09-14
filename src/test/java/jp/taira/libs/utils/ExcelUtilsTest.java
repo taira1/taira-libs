@@ -1014,7 +1014,7 @@ public class ExcelUtilsTest {
 
             assertNotNull(value);
             assertTrue(value instanceof HSSFRichTextString);
-            assertEquals(((HSSFRichTextString)value).toString(), "testA1");
+            assertEquals(value.toString(), "testA1");
         }
 
         { /* 通常(標準セル - 数値) */
@@ -1056,7 +1056,7 @@ public class ExcelUtilsTest {
 
             assertNotNull(value);
             assertTrue(value instanceof HSSFRichTextString);
-            assertEquals(((HSSFRichTextString)value).toString(), "   ");
+            assertEquals(value.toString(), "   ");
         }
 
         { /* 通常(日付セル) */
@@ -1131,7 +1131,7 @@ public class ExcelUtilsTest {
             assertNotNull(value);
             System.out.println("(" + cell.getRowIndex() + ", " + cell.getColumnIndex() + ") " + value.getClass().toString());
             assertTrue(value instanceof XSSFRichTextString);
-            assertEquals(((XSSFRichTextString)value).toString(), "testA1");
+            assertEquals(value.toString(), "testA1");
         }
 
         { /* 通常(標準セル - 数値) */
@@ -1176,7 +1176,7 @@ public class ExcelUtilsTest {
             assertNotNull(value);
             System.out.println("(" + cell.getRowIndex() + ", " + cell.getColumnIndex() + ") " + value.getClass().toString());
             assertTrue(value instanceof XSSFRichTextString);
-            assertEquals(((XSSFRichTextString)value).toString(), "   ");
+            assertEquals(value.toString(), "   ");
         }
 
         { /* 通常(日付セル) */
@@ -1234,7 +1234,7 @@ public class ExcelUtilsTest {
 
             assertNotNull(value);
             assertTrue(value instanceof XSSFRichTextString);
-            assertEquals(((XSSFRichTextString)value).toString(), "testA1");
+            assertEquals(value.toString(), "testA1");
         }
     }
 
@@ -1248,7 +1248,7 @@ public class ExcelUtilsTest {
 
             assertNotNull(value);
             assertTrue(value instanceof HSSFRichTextString);
-            assertEquals(((HSSFRichTextString)value).toString(), "testA1");
+            assertEquals(value.toString(), "testA1");
         }
 
         { /* 通常(横位置 - 左詰め) */
@@ -1259,7 +1259,7 @@ public class ExcelUtilsTest {
 
             assertNotNull(value);
             assertTrue(value instanceof HSSFRichTextString);
-            assertEquals(((HSSFRichTextString)value).toString(), "testA2");
+            assertEquals(value.toString(), "testA2");
         }
 
         { /* 通常(横位置 - 中央詰め) */
@@ -1270,7 +1270,7 @@ public class ExcelUtilsTest {
 
             assertNotNull(value);
             assertTrue(value instanceof HSSFRichTextString);
-            assertEquals(((HSSFRichTextString)value).toString(), "testA3");
+            assertEquals(value.toString(), "testA3");
         }
 
         { /* 通常(横位置 - 右詰め) */
@@ -1281,7 +1281,120 @@ public class ExcelUtilsTest {
 
             assertNotNull(value);
             assertTrue(value instanceof HSSFRichTextString);
-            assertEquals(((HSSFRichTextString)value).toString(), "testA4");
+            assertEquals(value.toString(), "testA4");
+        }
+    }
+
+    @Test
+    public void getCellValueTest_xlsx_書式設定() {
+        { /* 通常(横位置 - 標準) */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test-cell_format.xlsx"));
+            final Sheet sheet = ExcelUtils.getSheet(workbook, 0);
+            final Cell cell = ExcelUtils.getCell(sheet, 0, 0);
+            final Object value = ExcelUtils.getCellValue(workbook, cell);
+
+            assertNotNull(value);
+            assertTrue(value instanceof XSSFRichTextString);
+            assertEquals(value.toString(), "testA1");
+        }
+
+        { /* 通常(横位置 - 左詰め) */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test-cell_format.xlsx"));
+            final Sheet sheet = ExcelUtils.getSheet(workbook, 0);
+            final Cell cell = ExcelUtils.getCell(sheet, 1, 0);
+            final Object value = ExcelUtils.getCellValue(workbook, cell);
+
+            assertNotNull(value);
+            assertTrue(value instanceof XSSFRichTextString);
+            assertEquals(value.toString(), "testA2");
+        }
+
+        { /* 通常(横位置 - 中央詰め) */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test-cell_format.xlsx"));
+            final Sheet sheet = ExcelUtils.getSheet(workbook, 0);
+            final Cell cell = ExcelUtils.getCell(sheet, 2, 0);
+            final Object value = ExcelUtils.getCellValue(workbook, cell);
+
+            assertNotNull(value);
+            assertTrue(value instanceof XSSFRichTextString);
+            assertEquals("testA3", value.toString());
+        }
+
+        { /* 通常(横位置 - 右詰め) */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test-cell_format.xlsx"));
+            final Sheet sheet = ExcelUtils.getSheet(workbook, 0);
+            final Cell cell = ExcelUtils.getCell(sheet, 3, 0);
+            final Object value = ExcelUtils.getCellValue(workbook, cell);
+
+            assertNotNull(value);
+            assertTrue(value instanceof XSSFRichTextString);
+            assertEquals(value.toString(), "testA4");
+        }
+
+        { /* 通常(標準セル - 式の結果が数値) */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test-cell_format.xlsx"));
+            final Sheet sheet = ExcelUtils.getSheet(workbook, 0);
+            final Cell cell = ExcelUtils.getCell(sheet, 5, 0);
+            final Object value = ExcelUtils.getCellValue(workbook, cell);
+
+            assertNotNull(value);
+            assertTrue(value instanceof Double);
+            assertEquals(1.0, value);
+        }
+
+        { /* 通常(文字列セル - 式の結果が数値) */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test-cell_format.xlsx"));
+            final Sheet sheet = ExcelUtils.getSheet(workbook, 0);
+            final Cell cell = ExcelUtils.getCell(sheet, 6, 0);
+            final Object value = ExcelUtils.getCellValue(workbook, cell);
+
+            assertNotNull(value);
+            assertTrue(value instanceof Double);
+            assertEquals(1.0, value);
+        }
+
+        { /* 通常(数値セル - 式の結果が数値) */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test-cell_format.xlsx"));
+            final Sheet sheet = ExcelUtils.getSheet(workbook, 0);
+            final Cell cell = ExcelUtils.getCell(sheet, 7, 0);
+            final Object value = ExcelUtils.getCellValue(workbook, cell);
+
+            assertNotNull(value);
+            assertTrue(value instanceof Double);
+            assertEquals(1.0, value);
+        }
+
+        { /* 通常(標準セル - 式の結果が文字列) */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test-cell_format.xlsx"));
+            final Sheet sheet = ExcelUtils.getSheet(workbook, 0);
+            final Cell cell = ExcelUtils.getCell(sheet, 8, 0);
+            final Object value = ExcelUtils.getCellValue(workbook, cell);
+
+            assertNotNull(value);
+            assertTrue(value instanceof XSSFRichTextString);
+            assertEquals("OK", value.toString());
+        }
+
+        { /* 通常(文字列セル - 式の結果が文字列) */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test-cell_format.xlsx"));
+            final Sheet sheet = ExcelUtils.getSheet(workbook, 0);
+            final Cell cell = ExcelUtils.getCell(sheet, 9, 0);
+            final Object value = ExcelUtils.getCellValue(workbook, cell);
+
+            assertNotNull(value);
+            assertTrue(value instanceof XSSFRichTextString);
+            assertEquals("OK", value.toString());
+        }
+
+        { /* 通常(数値セル - 式の結果が文字列) */
+            final Workbook workbook = ExcelUtils.getWorkbook(getResourceFile("testExcel/test-cell_format.xlsx"));
+            final Sheet sheet = ExcelUtils.getSheet(workbook, 0);
+            final Cell cell = ExcelUtils.getCell(sheet, 10, 0);
+            final Object value = ExcelUtils.getCellValue(workbook, cell);
+
+            assertNotNull(value);
+            assertTrue(value instanceof XSSFRichTextString);
+            assertEquals("OK", value.toString());
         }
     }
 }
